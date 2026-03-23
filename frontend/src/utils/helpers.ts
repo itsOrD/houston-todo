@@ -18,3 +18,15 @@ export const filterByCompleted = (completed: boolean | null) => <T extends { com
 
 export const sortByPosition = <T extends { position: number }>(items: T[]) =>
   [...items].sort((a, b) => a.position - b.position);
+
+// Pure function — compute account status from credit percentage
+export function computeStatus(
+  used: number,
+  total: number,
+): "go" | "standby" | "no-go" {
+  if (total === 0) return "go";
+  const pct = ((total - used) / total) * 100;
+  if (pct < 5) return "no-go";
+  if (pct <= 25) return "standby";
+  return "go";
+}

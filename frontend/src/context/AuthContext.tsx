@@ -56,8 +56,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         clearToken();
         setToken(null);
         setLoading(false);
-      })
-      .finally(() => setLoading(false));
+      });
 
     return () => controller.abort();
   }, [token]);

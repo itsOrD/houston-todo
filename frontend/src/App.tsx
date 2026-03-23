@@ -4,11 +4,9 @@ import { useAuth } from "./context/useAuth";
 import { LoginPage } from "./pages/LoginPage";
 import { RegisterPage } from "./pages/RegisterPage";
 import { TaskListPage } from "./pages/TaskListPage";
-import { TaskDetailPage } from "./pages/TaskDetailPage";
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth();
-  console.log("loading", loading, "user", user);
   if (loading) return <p>Loading...</p>;
   if (!user) return <Navigate to="/login" />;
   return <>{children}</>;
@@ -26,14 +24,6 @@ export default function App() {
             element={
               <ProtectedRoute>
                 <TaskListPage />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/tasks/:id"
-            element={
-              <ProtectedRoute>
-                <TaskDetailPage />
               </ProtectedRoute>
             }
           />

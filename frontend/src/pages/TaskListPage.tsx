@@ -1,16 +1,15 @@
 import { useState, useMemo } from "react";
-import { Link } from "react-router-dom";
-import { useTasks, type Task } from "../hooks/useTasks";
 import { useAuth } from "../context/useAuth";
+import { useTasks } from "../hooks/useTasks";
 import { pipe, filterByCompleted, sortByPosition } from "../utils/helpers";
 
 export function TaskListPage() {
   const { user, logout } = useAuth();
-  const { tasks, loading, create, update, remove, reorder } = useTasks();
+  const { tasks, loading, create, update, remove } = useTasks();
   const [newTask, setNewTask] = useState("");
   const [filter, setFilter] = useState<boolean | null>(null);
 
-  // Composable filter pipeline using pipe + curried filters
+  // Composable filter pipeline — pipe + curried HOF
   const filteredTasks = useMemo(
     () => pipe(filterByCompleted(filter), sortByPosition)(tasks),
     [tasks, filter],
@@ -41,7 +40,7 @@ export function TaskListPage() {
   return (
     <div className="task-list-page">
       <header>
-        <h1>Mission Manifest</h1>
+        <h1>Houston</h1>
         <span>Welcome, {user?.name}</span>
         <button onClick={logout}>Logout</button>
       </header>
@@ -61,24 +60,9 @@ export function TaskListPage() {
       </div>
 
       <div className="filters">
-        <button
-          onClick={() => setFilter(null)}
-          className={filter === null ? "active" : ""}
-        >
-          All
-        </button>
-        <button
-          onClick={() => setFilter(false)}
-          className={filter === false ? "active" : ""}
-        >
-          Active
-        </button>
-        <button
-          onClick={() => setFilter(true)}
-          className={filter === true ? "active" : ""}
-        >
-          Done
-        </button>
+        <button onClick={() => setFilter(null)} className={filter === null ? "active" : ""}>All</button>
+        <button onClick={() => setFilter(false)} className={filter === false ? "active" : ""}>Active</button>
+        <button onClick={() => setFilter(true)} className={filter === true ? "active" : ""}>Done</button>
       </div>
 
       <ul className="tasks">
@@ -89,10 +73,8 @@ export function TaskListPage() {
               checked={task.completed}
               onChange={() => update(task.id, { completed: !task.completed })}
             />
-            <Link to={`/tasks/${task.id}`}>{task.description}</Link>
-            <button onClick={() => remove(task.id)} className="delete">
-              ×
-            </button>
+            <span className="task-desc">{task.description}</span>
+            <button onClick={() => remove(task.id)} className="delete">×</button>
           </li>
         ))}
       </ul>
