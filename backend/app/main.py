@@ -9,7 +9,7 @@ app = FastAPI(title="Houston To-Do API")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"],
+    allow_origins=["http://localhost:3001"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -127,7 +127,7 @@ def list_tasks(
 @app.get("/api/tasks/{task_id}")
 def get_task(task_id: str, user: dict = Depends(get_current_user)):
     task = tasks.get(task_id)
-    if not task or task["owener"] != user["id"]:
+    if not task or task["owner"] != user["id"]:
         raise HTTPException(404, "Task not found")
     return task
 
@@ -148,7 +148,7 @@ def update_task(
 
 @app.delete("/api/tasks/{task_id}", status_code=204)
 def delete_task(task_id: str, user: dict = Depends(get_current_user)):
-    task = tasks.get((task_id))
+    task = tasks.get(task_id)
     if not task or task["owner"] != user["id"]:
         raise HTTPException(404, "Task not found")
     del tasks[task_id]
