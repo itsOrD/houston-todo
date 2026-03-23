@@ -1,4 +1,5 @@
 import { useState, useMemo } from "react";
+import { Link } from "react-router-dom";
 import { useAuth } from "../context/useAuth";
 import { useTasks } from "../hooks/useTasks";
 import { useAccounts } from "../hooks/useAccounts";
@@ -209,7 +210,7 @@ export function TaskListPage() {
                   checked={task.completed}
                   onChange={() => update(task.id, { completed: !task.completed })}
                 />
-                <span className="task-desc">{task.description}</span>
+                <Link to={`/tasks/${task.id}`} className="task-desc">{task.description}</Link>
                 {acct && <span className="task-account-tag">{acct.name}</span>}
                 <button onClick={() => remove(task.id)} className="delete">×</button>
               </li>

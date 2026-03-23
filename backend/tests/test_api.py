@@ -1,19 +1,4 @@
-"""Tests for Houston API — AI account mission control.
-
-# TODO: Given more time, expand test coverage:
-# - test_update_task_description
-# - test_update_task_completed_toggle
-# - test_filter_tasks_by_completed
-# - test_reorder_tasks_persists_positions
-# - test_account_credit_boundaries (0 and max)
-# - test_account_update_all_fields
-# - test_delete_account_removes_from_list
-# - test_concurrent_credit_updates
-# - test_invalid_token_returns_401
-# - test_cross_user_account_access_blocked (IDOR)
-# - test_register_duplicate_email_returns_400
-# - test_task_with_invalid_account_id
-"""
+"""Tests for Houston API — auth, task CRUD, and AI account credit tracking."""
 
 import pytest
 from fastapi.testclient import TestClient

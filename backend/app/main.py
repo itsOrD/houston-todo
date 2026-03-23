@@ -17,7 +17,7 @@ app.add_middleware(
 
 
 ### In-memory data store ###
-users: dict[str, dict] = {}       # email -> user data# email -> {id, name, email, password}
+users: dict[str, dict] = {}       # email -> {id, name, email, password}
 tokens: dict[str, str] = {}       # token -> user_id
 tasks: dict[str, dict] = {}       # task_id -> {id, description, completed, owner, position}
 accounts: dict[str, dict] = {}   # account_id -> {id, name, credits_used, credits_total, ...}

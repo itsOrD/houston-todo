@@ -2,7 +2,7 @@
 
 Manage your AI credit usage across all your accounts — Claude, ChatGPT, Loveable, Cursor, and more. Plan and prepare tasks for when your credits refresh, track what you're spending where, and keep a clear picture of your AI tooling.
 
-## Quick Start (Mac)
+## Deployment / Running Instructions (Mac)
 
 **Prerequisites:** Docker and Docker Compose
 
@@ -11,6 +11,8 @@ docker compose up --build
 ```
 
 Visit **http://localhost:3000** — register an account to start managing your AI credit usage. Plan and prepare tasks for when your credits refresh!
+
+To stop: `docker compose down`
 
 ### Without Docker
 
@@ -29,60 +31,94 @@ npm install
 npm run dev
 ```
 
-Visit **http://localhost:3000**.
+### Running Tests
 
-## Approach
+```bash
+cd backend
+source .venv/bin/activate
+pytest -v
+```
 
-Built as a full-stack monorepo with a FastAPI backend and React frontend.
+### Cloud Deployment
 
-- **Backend:** Single-file FastAPI API with Pydantic validation, UUID-based auth tokens, and tenant-isolated storage. In-memory store keeps scope focused — swapping to SQLAlchemy + PostgreSQL is a configuration change, not an architectural one.
+The Docker Compose setup is designed to run on any cloud VM. For AWS:
 
-- **Frontend:** React 19 + TypeScript. Higher-order function pattern for the API client (`createClient(token)` returns configured methods). Composable filter pipeline using `pipe()` and curried filter functions. Custom hooks (`useTasks`, `useAccounts`) encapsulate the full async lifecycle with `AbortController` cleanup and optimistic updates.
+```
+Internet → EC2 t4g.micro
+              ├── Docker: nginx (frontend) :80
+              ├── Docker: uvicorn (backend) :8000
+              └── In-memory store (swap to RDS PostgreSQL for persistence)
+```
 
-- **Testing:** pytest for backend (auth, CRUD, tenant isolation, account credits). Inline TODO comments document planned test expansion.
+Provision with Terraform, deploy with `docker compose up --build -d`. Estimated cost: ~$4-10/month.
 
-## Features
+---
 
-- **AI Account Dashboard** — Add accounts (Claude, ChatGPT, etc.) with credit limits, reset schedules, and timezones. +/− buttons for manual credit tracking. GO/STANDBY/NO-GO status computed from remaining credit percentage.
-- **Task Management** — Create, complete, and delete tasks. Tag tasks to specific AI accounts. Filter by completion status. Stats bar via reduce.
-- **Auth** — Register, login, logout with protected routes and token persistence.
+## Summary
 
-## Functional Patterns (Bonus)
+### Approach
 
-| Pattern | Location |
-|---------|----------|
-| Higher-order function | `api/client.ts` — `createClient(token)` returns configured fetcher |
-| Function composition | `utils/helpers.ts` — `pipe(...fns)` composes N functions |
-| `reduce` | `utils/helpers.ts` — `groupBy()` via reduce |
-| `reduce` | `TaskListPage.tsx` — stats computation |
-| Curried filters | `utils/helpers.ts` — `filterByCompleted(value)` returns filter fn |
-| Pure functions | `utils/helpers.ts` — `computeStatus()` derives GO/STANDBY/NO-GO |
+Built as a full-stack monorepo with a **FastAPI backend** and **React 19 + TypeScript frontend**, containerized with Docker Compose.
 
-## Async Patterns (Bonus)
+- **Backend:** Single-file FastAPI API with Pydantic validation, UUID-based auth tokens, and tenant-isolated in-memory storage. The architecture is deliberately simple — swapping to SQLAlchemy + PostgreSQL is a configuration change, not an architectural one.
 
-| Pattern | Location |
-|---------|----------|
-| Custom hooks | `useTasks`, `useAccounts` — encapsulate fetch lifecycle |
-| `AbortController` | `AuthProvider`, `useTasks`, `useAccounts` — cancel on unmount |
-| Optimistic updates | `useTasks.update()`, `useAccounts.updateCredits()` — immediate UI, rollback on error |
+- **Frontend:** Higher-order function pattern for the API client (`createClient(token)` returns configured methods). Composable filter pipeline using `pipe()` and curried filter functions. Custom hooks (`useTasks`, `useAccounts`) encapsulate the full async lifecycle with `AbortController` cleanup and optimistic updates with rollback.
 
-## Given More Time
+- **Testing:** pytest with TestClient for the backend — covers auth flow, task CRUD, tenant isolation, and account credit tracking (11 tests).
 
-- **Database:** SQLAlchemy + SQLite/PostgreSQL with Alembic migrations
-- **Credit auto-reset:** Server-side scheduled reset (daily/monthly with timezone-aware DST handling)
-- **Real AI integrations:** Auto-fetch credit usage from provider APIs (OpenAI, Anthropic)
-- **Kanban board:** Drag-and-drop between columns (backlog → in-progress → done)
-- **Task detail page:** Full edit form with priority, stage, account reassignment
-- **E2E tests:** Playwright for full user journey testing
-- **Cloud deployment:** AWS EC2 or ECS Fargate with Terraform IaC
+### Features Completed
 
-## Making It More Robust
+- **Login / Register** — Landing page with auth forms, token persistence across refresh
+- **Task list** — View all tasks after signing in, with active/completed stats
+- **Task CRUD** — Create tasks, view list, navigate to detail screen for editing, toggle completed, delete
+- **Task detail screen** — Edit description, toggle completion, delete — navigable from the task list
+- **Organize task list** — Filter by All / Active / Done, sorted by position
+- **AI Account Dashboard** — Add accounts (Claude, ChatGPT, etc.) with credit limits, reset schedules, and timezones. Manual +/− credit tracking. GO/STANDBY/NO-GO status computed from remaining percentage.
+- **Task-to-account tagging** — Assign tasks to AI accounts, shown as tags in the list
+- **Docker Compose** — Single-command startup with nginx reverse proxy and health checks
 
-- **Authentication:** JWT with proper expiry, or integrate Keycloak/Auth0
-- **Rate limiting:** slowapi on auth endpoints
+### Given More Time
+
+- **Database:** SQLAlchemy + SQLite/PostgreSQL with Alembic migrations (replace in-memory store — ~2 hours)
+- **Credit auto-reset:** Server-side scheduled reset with timezone-aware DST handling (~1 hour)
+- **Real AI integrations:** Auto-fetch credit usage from provider APIs like OpenAI and Anthropic (~3 hours)
+- **Drag-and-drop reordering:** The backend already supports position-based reorder — wire up @dnd-kit on the frontend (~1 hour)
+- **Kanban board:** Drag-and-drop between columns with stage-based filtering (~2 hours)
+- **Frontend tests:** Vitest + React Testing Library for component and integration tests (~2 hours)
+- **E2E tests:** Playwright for full user journey testing (~2 hours)
+- **CI/CD:** GitHub Actions pipeline with automated test and deploy (~1 hour)
+
+### Making It More Robust
+
+- **Authentication:** JWT with proper expiry and refresh tokens, or integrate Keycloak/Auth0 for SSO
+- **Password hashing:** bcrypt or argon2 (currently plaintext for demo scope)
+- **Rate limiting:** slowapi on auth endpoints to prevent brute force
 - **HTTPS:** Let's Encrypt or AWS Certificate Manager
-- **Structured logging:** structlog with correlation IDs
-- **CI/CD:** GitHub Actions with automated test + deploy pipeline
+- **Structured logging:** structlog with correlation IDs for request tracing
+- **Input sanitization:** HTML escaping on task descriptions to prevent XSS
+- **Health checks with dependency status:** Verify DB and external API connectivity
+- **Monitoring:** CloudWatch or Prometheus for alerting on error rates and latency
+
+---
+
+## Bonus: Functional Patterns
+
+| Pattern | Location |
+|---------|----------|
+| Higher-order function | `api/client.ts` — `createClient(token)` returns a configured fetcher |
+| Function composition | `utils/helpers.ts` — `pipe(...fns)` composes N functions left-to-right |
+| `reduce` | `utils/helpers.ts` — `groupBy()` implemented as a pure reduce |
+| `reduce` | `TaskListPage.tsx` — stats computation (active/completed counts) |
+| Curried filters | `utils/helpers.ts` — `filterByCompleted(value)` returns a reusable filter function |
+| Pure functions | `utils/helpers.ts` — `computeStatus()` derives GO/STANDBY/NO-GO with no side effects |
+
+## Bonus: Async Patterns
+
+| Pattern | Location |
+|---------|----------|
+| Custom hooks | `useTasks`, `useAccounts` — encapsulate the full fetch lifecycle (loading, data, error) |
+| `AbortController` | `AuthProvider`, `useTasks`, `useAccounts` — cancel in-flight requests on unmount |
+| Optimistic updates | `useTasks.update()`, `useAccounts.updateCredits()` — update UI immediately, rollback on error |
 
 ## Tech Stack
 
