@@ -1,6 +1,6 @@
 /* ============================================
    HOUSTON MISSION CONTROL — PHOSPHOR TERMINAL
-   Green phosphor CRT terminal aesthetic
+   Retro CRT green phosphor terminal aesthetic
    ============================================ */
 
 /* --- CSS Variables --- */
@@ -22,6 +22,9 @@
 
   --border-default: #0a3a0a;
   --border-subtle: #082808;
+
+  --glow-subtle: rgba(0, 255, 65, 0.08);
+  --glow-strong: rgba(0, 255, 65, 0.15);
 
   --radius-sm: 0px;
   --radius-md: 0px;
@@ -54,6 +57,39 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
+  position: relative;
+}
+
+/* --- CRT Scanlines Overlay --- */
+body::before {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent 0,
+    transparent 2px,
+    rgba(0, 0, 0, 0.15) 2px,
+    rgba(0, 0, 0, 0.15) 4px
+  );
+  z-index: 1000;
+  pointer-events: none;
+}
+
+/* --- Screen Vignette --- */
+body::after {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(ellipse at center, transparent 50%, rgba(0, 0, 0, 0.4) 100%);
+  z-index: 999;
+  pointer-events: none;
 }
 
 #root {
@@ -65,10 +101,35 @@ body {
   min-height: 100vh;
 }
 
+/* --- Flicker Animation --- */
+@keyframes textFlicker {
+  0%, 96% {
+    opacity: 1;
+  }
+  97% {
+    opacity: 0.85;
+  }
+  98% {
+    opacity: 0.9;
+  }
+  99% {
+    opacity: 0.82;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
 /* --- Global Elements --- */
 a {
   color: var(--phosphor-primary);
   text-decoration: underline;
+  transition: text-shadow 0.2s ease, color 0.2s ease;
+}
+
+a:hover {
+  text-shadow: 0 0 8px var(--glow-strong);
+  color: var(--phosphor-bright);
 }
 
 button {
@@ -82,6 +143,16 @@ button {
   cursor: pointer;
   text-transform: uppercase;
   letter-spacing: 0.05em;
+  transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease,
+    text-shadow 0.15s ease, box-shadow 0.15s ease;
+}
+
+button:hover {
+  background: var(--glow-subtle);
+  border-color: var(--phosphor-secondary);
+  color: var(--phosphor-bright);
+  text-shadow: 0 0 8px var(--glow-strong);
+  box-shadow: 0 0 8px var(--glow-subtle);
 }
 
 button.danger {
@@ -89,10 +160,19 @@ button.danger {
   color: var(--status-nogo);
 }
 
+button.danger:hover {
+  background: rgba(255, 0, 64, 0.08);
+  border-color: #6a0020;
+  text-shadow: 0 0 8px rgba(255, 0, 64, 0.3);
+  box-shadow: 0 0 8px rgba(255, 0, 64, 0.08);
+  color: #ff3366;
+}
+
 button.active {
   background: var(--phosphor-muted);
   color: var(--phosphor-bright);
   border-color: var(--phosphor-secondary);
+  text-shadow: 0 0 8px var(--glow-strong);
 }
 
 input,
@@ -109,6 +189,15 @@ select {
   width: 100%;
   -webkit-font-smoothing: none;
   -moz-osx-font-smoothing: unset;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+  outline: none;
+  border-color: var(--phosphor-secondary);
+  box-shadow: 0 0 8px var(--glow-subtle);
 }
 
 textarea {
@@ -152,12 +241,19 @@ select option {
   letter-spacing: 0.15em;
   text-transform: uppercase;
   color: var(--phosphor-primary);
+  text-shadow: 0 0 10px var(--glow-strong), 0 0 20px var(--glow-subtle);
+  animation: textFlicker 4s infinite;
 }
 
 .tagline {
   font-size: 0.9rem;
   color: var(--phosphor-dim);
   margin-bottom: 16px;
+}
+
+.tagline::before {
+  content: "> ";
+  color: var(--phosphor-muted);
 }
 
 .auth-page form {
@@ -167,7 +263,7 @@ select option {
   width: 100%;
   max-width: 360px;
   padding: 24px;
-  border: 1px solid var(--border-default);
+  border: 1px dashed var(--border-default);
   border-radius: var(--radius-md);
 }
 
@@ -183,6 +279,7 @@ select option {
   border: 1px solid #3a0a14;
   border-radius: var(--radius-sm);
   background: #0a0005;
+  text-shadow: 0 0 6px rgba(255, 0, 64, 0.2);
 }
 
 /* --- Task List Page --- */
@@ -206,6 +303,8 @@ select option {
   letter-spacing: 0.12em;
   text-transform: uppercase;
   color: var(--phosphor-primary);
+  text-shadow: 0 0 10px var(--glow-strong);
+  animation: textFlicker 4s infinite;
   flex: 1;
 }
 
@@ -239,6 +338,16 @@ select option {
   color: var(--phosphor-secondary);
 }
 
+.section-header h2::before {
+  content: "[ ";
+  color: var(--phosphor-muted);
+}
+
+.section-header h2::after {
+  content: " ]";
+  color: var(--phosphor-muted);
+}
+
 .section-header button {
   font-size: 0.8rem;
   padding: 4px 12px;
@@ -250,7 +359,7 @@ select option {
   align-items: flex-end;
   flex-wrap: wrap;
   padding: 16px;
-  border: 1px solid var(--border-default);
+  border: 1px dashed var(--border-default);
   border-radius: var(--radius-md);
 }
 
@@ -278,18 +387,39 @@ select option {
   flex-direction: column;
   gap: 10px;
   background: var(--bg-card);
+  transition: box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.account-card:hover {
+  box-shadow: 0 0 12px var(--glow-subtle), inset 0 0 12px var(--glow-subtle);
+  border-color: var(--phosphor-secondary);
 }
 
 .account-card.status-go {
   border-color: var(--phosphor-muted);
 }
 
+.account-card.status-go:hover {
+  border-color: var(--phosphor-secondary);
+  box-shadow: 0 0 12px var(--glow-subtle), inset 0 0 12px var(--glow-subtle);
+}
+
 .account-card.status-standby {
   border-color: #3a3a00;
 }
 
+.account-card.status-standby:hover {
+  border-color: #6a6a00;
+  box-shadow: 0 0 12px rgba(255, 255, 0, 0.06), inset 0 0 12px rgba(255, 255, 0, 0.04);
+}
+
 .account-card.status-no-go {
   border-color: #3a0014;
+}
+
+.account-card.status-no-go:hover {
+  border-color: #6a0020;
+  box-shadow: 0 0 12px rgba(255, 0, 64, 0.06), inset 0 0 12px rgba(255, 0, 64, 0.04);
 }
 
 .account-header {
@@ -318,16 +448,19 @@ select option {
 .status-badge.go {
   border-color: var(--phosphor-secondary);
   color: var(--status-go);
+  text-shadow: 0 0 6px rgba(0, 255, 65, 0.3);
 }
 
 .status-badge.standby {
   border-color: #6a6a00;
   color: var(--status-standby);
+  text-shadow: 0 0 6px rgba(255, 255, 0, 0.3);
 }
 
 .status-badge.no-go {
   border-color: #6a0020;
   color: var(--status-nogo);
+  text-shadow: 0 0 6px rgba(255, 0, 64, 0.3);
 }
 
 .credit-row {
@@ -346,10 +479,16 @@ select option {
   min-width: 40px;
   text-align: center;
   color: var(--phosphor-bright);
+  text-shadow: 0 0 6px var(--glow-subtle);
 }
 
 .account-meta {
   font-size: 0.8rem;
+  color: var(--phosphor-muted);
+}
+
+.account-meta::before {
+  content: "// ";
   color: var(--phosphor-muted);
 }
 
@@ -368,11 +507,26 @@ select option {
   color: var(--phosphor-secondary);
 }
 
+.tasks-section h2::before {
+  content: "[ ";
+  color: var(--phosphor-muted);
+}
+
+.tasks-section h2::after {
+  content: " ]";
+  color: var(--phosphor-muted);
+}
+
 .stats {
   font-size: 0.85rem;
   color: var(--phosphor-dim);
   padding: 8px 0;
   border-bottom: 1px solid var(--border-subtle);
+}
+
+.stats::before {
+  content: "STATUS: ";
+  color: var(--phosphor-muted);
 }
 
 .add-task {
@@ -413,6 +567,7 @@ select option {
   background: var(--phosphor-muted);
   color: var(--phosphor-bright);
   border-color: var(--phosphor-secondary);
+  text-shadow: 0 0 8px var(--glow-strong);
 }
 
 .tasks {
@@ -429,10 +584,15 @@ select option {
   padding: 10px 12px;
   border: 1px solid var(--border-default);
   border-bottom: none;
+  transition: background 0.15s ease;
 }
 
 .tasks li:last-child {
   border-bottom: 1px solid var(--border-default);
+}
+
+.tasks li:hover {
+  background: var(--glow-subtle);
 }
 
 .task-desc {
@@ -453,6 +613,12 @@ select option {
   border-radius: var(--radius-sm);
   color: var(--phosphor-dim);
   white-space: nowrap;
+  transition: border-color 0.15s ease, text-shadow 0.15s ease;
+}
+
+.task-account-tag:hover {
+  border-color: var(--phosphor-secondary);
+  text-shadow: 0 0 6px var(--glow-subtle);
 }
 
 .tasks li .delete {
@@ -460,6 +626,12 @@ select option {
   padding: 2px 8px;
   border: 1px solid #3a0a14;
   color: var(--status-nogo);
+}
+
+.tasks li .delete:hover {
+  background: rgba(255, 0, 64, 0.08);
+  border-color: #6a0020;
+  text-shadow: 0 0 6px rgba(255, 0, 64, 0.3);
 }
 
 /* --- Task Detail Page --- */
@@ -474,6 +646,12 @@ select option {
 .task-detail-page > a {
   font-size: 0.85rem;
   color: var(--phosphor-dim);
+  transition: color 0.2s ease, text-shadow 0.2s ease;
+}
+
+.task-detail-page > a:hover {
+  color: var(--phosphor-primary);
+  text-shadow: 0 0 8px var(--glow-strong);
 }
 
 .task-detail-page h2 {
@@ -482,6 +660,7 @@ select option {
   letter-spacing: 0.1em;
   text-transform: uppercase;
   color: var(--phosphor-primary);
+  text-shadow: 0 0 8px var(--glow-subtle);
 }
 
 label {
@@ -511,6 +690,14 @@ label {
   color: var(--status-nogo);
 }
 
+.actions button.danger:hover {
+  background: rgba(255, 0, 64, 0.08);
+  border-color: #6a0020;
+  text-shadow: 0 0 8px rgba(255, 0, 64, 0.3);
+  box-shadow: 0 0 8px rgba(255, 0, 64, 0.08);
+  color: #ff3366;
+}
+
 /* --- Scrollbar --- */
 ::-webkit-scrollbar {
   width: 6px;
@@ -524,6 +711,10 @@ label {
 ::-webkit-scrollbar-thumb {
   background: var(--phosphor-muted);
   border-radius: 0px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--phosphor-dim);
 }
 
 /* --- Responsive --- */
