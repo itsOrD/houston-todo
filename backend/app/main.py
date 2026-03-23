@@ -19,7 +19,8 @@ app.add_middleware(
 ### In-memory data store ###
 users: dict[str, dict] = {}       # email -> user data# email -> {id, name, email, password}
 tokens: dict[str, str] = {}       # token -> user_id
-tasks: dict[str, dict] = {}       # task_id -> task_id -> {id, description, completed, owner, position}
+tasks: dict[str, dict] = {}       # task_id -> {id, description, completed, owner, position}
+accounts: dict[str, dict] = {}   # account_id -> {id, name, credits_used, credits_total, ...}
 
 
 ### Pydantic models ###
@@ -34,6 +35,7 @@ class UserLogin(BaseModel):
 
 class TaskCreate(BaseModel):
     description: str = Field(min_length=1, max_length=500)
+    account_id: str | None = None
 
 class TaskUpdate(BaseModel):
     description: str | None = None
@@ -41,6 +43,23 @@ class TaskUpdate(BaseModel):
 
 class ReorderRequest(BaseModel):
     task_ids: list[str]
+
+
+class AccountCreate(BaseModel):
+    name: str = Field(min_length=1, max_length=200)
+    credits_total: int = Field(ge=1, le=10000)
+    reset_frequency: str = "daily"
+    reset_time: str = "00:00"
+    timezone: str = "UTC"
+
+
+class AccountUpdate(BaseModel):
+    name: str | None = None
+    credits_used: int | None = None
+    credits_total: int | None = None
+    reset_frequency: str | None = None
+    reset_time: str | None = None
+    timezone: str | None = None
 
 
 ### Authentication dependency ###
@@ -110,6 +129,7 @@ def create_task(body: TaskCreate, user: dict = Depends(get_current_user)):
         "completed": False,
         "owner": user["id"],
         "position": len(user_tasks),
+        "account_id": body.account_id,
     }
     return tasks[task_id]
 
@@ -157,6 +177,56 @@ def delete_task(task_id: str, user: dict = Depends(get_current_user)):
 def reorder_tasks(body: ReorderRequest, user: dict = Depends(get_current_user)):
     for i, task_id in enumerate(body.task_ids):
         task = tasks.get(task_id)
-        if task and task["owner"] == user ["id"]:
+        if task and task["owner"] == user["id"]:
             task["position"] = i
     return {"message": "Tasks reordered successfully"}
+
+
+# ── Account endpoints ────────────────────────────────────────────
+@app.post("/api/accounts", status_code=201)
+def create_account(body: AccountCreate, user: dict = Depends(get_current_user)):
+    account_id = str(uuid.uuid4())
+    account = {
+        "id": account_id,
+        "owner": user["id"],
+        "name": body.name,
+        "credits_used": 0,
+        "credits_total": body.credits_total,
+        "reset_frequency": body.reset_frequency,
+        "reset_time": body.reset_time,
+        "timezone": body.timezone,
+    }
+    accounts[account_id] = account
+    return account
+
+
+@app.get("/api/accounts")
+def list_accounts(user: dict = Depends(get_current_user)):
+    return [a for a in accounts.values() if a["owner"] == user["id"]]
+
+
+@app.put("/api/accounts/{account_id}")
+def update_account(
+    account_id: str, body: AccountUpdate, user: dict = Depends(get_current_user)
+):
+    account = accounts.get(account_id)
+    if not account or account["owner"] != user["id"]:
+        raise HTTPException(404, "Account not found")
+    for field in ["name", "credits_used", "credits_total", "reset_frequency", "reset_time", "timezone"]:
+        val = getattr(body, field)
+        if val is not None:
+            account[field] = val
+    return account
+
+
+@app.delete("/api/accounts/{account_id}", status_code=204)
+def delete_account(account_id: str, user: dict = Depends(get_current_user)):
+    account = accounts.get(account_id)
+    if not account or account["owner"] != user["id"]:
+        raise HTTPException(404, "Account not found")
+    del accounts[account_id]
+
+
+@app.get("/api/health")
+def health():
+    return {"status": "ok"}
