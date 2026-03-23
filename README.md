@@ -76,6 +76,7 @@ Built as a full-stack monorepo with a **FastAPI backend** and **React 19 + TypeS
 - **AI Account Dashboard** — Add accounts (Claude, ChatGPT, etc.) with credit limits, reset schedules, and timezones. Manual +/− credit tracking. GO/STANDBY/NO-GO status computed from remaining percentage.
 - **Task-to-account tagging** — Assign tasks to AI accounts, shown as tags in the list
 - **Docker Compose** — Single-command startup with nginx reverse proxy and health checks
+- **Security hardening** — Bearer token validation, Pydantic field constraints on all inputs, non-root Docker container, nginx security headers (X-Frame-Options, X-Content-Type-Options, Referrer-Policy), account ownership validation on task creation, backend not exposed to host network
 
 ### Given More Time
 
@@ -107,8 +108,7 @@ Built as a full-stack monorepo with a **FastAPI backend** and **React 19 + TypeS
 |---------|----------|
 | Higher-order function | `api/client.ts` — `createClient(token)` returns a configured fetcher |
 | Function composition | `utils/helpers.ts` — `pipe(...fns)` composes N functions left-to-right |
-| `reduce` | `utils/helpers.ts` — `groupBy()` implemented as a pure reduce |
-| `reduce` | `TaskListPage.tsx` — stats computation (active/completed counts) |
+| `reduce` | `TaskListPage.tsx` — `tasks.reduce()` computes active/completed stats |
 | Curried filters | `utils/helpers.ts` — `filterByCompleted(value)` returns a reusable filter function |
 | Pure functions | `utils/helpers.ts` — `computeStatus()` derives GO/STANDBY/NO-GO with no side effects |
 
