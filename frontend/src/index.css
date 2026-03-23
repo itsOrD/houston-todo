@@ -1,0 +1,486 @@
+/* ============================================
+   HOUSTON MISSION CONTROL — PHOSPHOR TERMINAL
+   Commit 1: Layout & Structure
+   ============================================ */
+
+/* --- Reset & Base --- */
+*,
+*::before,
+*::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+:root {
+  --radius-sm: 0px;
+  --radius-md: 0px;
+  --radius-lg: 0px;
+}
+
+html {
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+body {
+  background: #000000;
+  color: #aaaaaa;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+#root {
+  width: 100%;
+  max-width: 900px;
+  padding: 24px 16px;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+/* --- Global Elements --- */
+a {
+  color: #aaaaaa;
+  text-decoration: underline;
+}
+
+button {
+  font-family: inherit;
+  font-size: 0.9rem;
+  padding: 6px 16px;
+  border: 1px solid #333333;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: #aaaaaa;
+  cursor: pointer;
+}
+
+button.danger {
+  border-color: #555555;
+  color: #cc5555;
+}
+
+button.active {
+  background: #222222;
+  color: #cccccc;
+}
+
+input,
+textarea,
+select {
+  font-family: inherit;
+  font-size: 0.9rem;
+  padding: 6px 10px;
+  border: 1px solid #333333;
+  border-radius: var(--radius-sm);
+  background: #0a0a0a;
+  color: #aaaaaa;
+  width: 100%;
+}
+
+textarea {
+  min-height: 120px;
+  resize: vertical;
+}
+
+select {
+  width: auto;
+}
+
+/* --- Auth Page --- */
+.auth-page {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 80vh;
+  gap: 16px;
+  text-align: center;
+}
+
+.auth-page h1 {
+  font-size: 2rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+}
+
+.tagline {
+  font-size: 0.9rem;
+  color: #777777;
+  margin-bottom: 16px;
+}
+
+.auth-page form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+  max-width: 360px;
+  padding: 24px;
+  border: 1px solid #333333;
+  border-radius: var(--radius-md);
+}
+
+.auth-page form button {
+  width: 100%;
+  padding: 10px;
+}
+
+.error {
+  color: #cc5555;
+  font-size: 0.85rem;
+  padding: 8px;
+  border: 1px solid #553333;
+  border-radius: var(--radius-sm);
+  background: #1a0a0a;
+}
+
+/* --- Task List Page --- */
+.task-list-page {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  width: 100%;
+}
+
+.task-list-page > header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.task-list-page > header h1 {
+  font-size: 1.5rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  flex: 1;
+}
+
+.task-list-page > header span {
+  font-size: 0.85rem;
+  color: #777777;
+}
+
+.task-list-page > header button {
+  margin-left: auto;
+}
+
+/* --- Accounts Section --- */
+.accounts-section {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.section-header h2 {
+  font-size: 1.1rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.section-header button {
+  font-size: 0.8rem;
+  padding: 4px 12px;
+}
+
+.add-account-form {
+  display: flex;
+  gap: 8px;
+  align-items: flex-end;
+  flex-wrap: wrap;
+  padding: 16px;
+  border: 1px solid #333333;
+  border-radius: var(--radius-md);
+}
+
+.add-account-form input,
+.add-account-form select {
+  flex: 1;
+  min-width: 120px;
+}
+
+.add-account-form button {
+  white-space: nowrap;
+}
+
+.accounts-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 12px;
+}
+
+.account-card {
+  border: 1px solid #333333;
+  border-radius: var(--radius-md);
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.account-card.status-go {
+  border-color: #336633;
+}
+
+.account-card.status-standby {
+  border-color: #666633;
+}
+
+.account-card.status-no-go {
+  border-color: #663333;
+}
+
+.account-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.account-header strong {
+  font-size: 0.95rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.status-badge {
+  font-size: 0.7rem;
+  padding: 2px 8px;
+  border: 1px solid #555555;
+  border-radius: var(--radius-sm);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.status-badge.go {
+  border-color: #336633;
+  color: #66aa66;
+}
+
+.status-badge.standby {
+  border-color: #666633;
+  color: #aaaa66;
+}
+
+.status-badge.no-go {
+  border-color: #663333;
+  color: #aa6666;
+}
+
+.credit-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.credit-row button {
+  padding: 2px 10px;
+  font-size: 0.85rem;
+}
+
+.credit-row span {
+  font-size: 0.9rem;
+  min-width: 40px;
+  text-align: center;
+}
+
+.account-meta {
+  font-size: 0.8rem;
+  color: #666666;
+}
+
+/* --- Tasks Section --- */
+.tasks-section {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.tasks-section h2 {
+  font-size: 1.1rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.stats {
+  font-size: 0.85rem;
+  color: #777777;
+  padding: 8px 0;
+  border-bottom: 1px solid #222222;
+}
+
+.add-task {
+  display: flex;
+  gap: 8px;
+  align-items: flex-end;
+  flex-wrap: wrap;
+}
+
+.add-task input {
+  flex: 2;
+  min-width: 180px;
+}
+
+.add-task select {
+  flex: 0 0 auto;
+  min-width: 120px;
+}
+
+.add-task button {
+  white-space: nowrap;
+}
+
+.filters {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+
+.filters button {
+  font-size: 0.8rem;
+  padding: 4px 12px;
+  border: 1px solid #333333;
+}
+
+.filters button.active {
+  background: #222222;
+  color: #cccccc;
+  border-color: #555555;
+}
+
+.tasks {
+  list-style: none;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.tasks li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border: 1px solid #333333;
+  border-bottom: none;
+}
+
+.tasks li:last-child {
+  border-bottom: 1px solid #333333;
+}
+
+.task-desc {
+  flex: 1;
+  font-size: 0.9rem;
+}
+
+.tasks li.completed .task-desc {
+  text-decoration: line-through;
+  color: #555555;
+}
+
+.task-account-tag {
+  font-size: 0.75rem;
+  padding: 2px 8px;
+  border: 1px solid #333333;
+  border-radius: var(--radius-sm);
+  color: #777777;
+  white-space: nowrap;
+}
+
+.tasks li .delete {
+  font-size: 0.8rem;
+  padding: 2px 8px;
+  border: 1px solid #443333;
+  color: #aa6666;
+}
+
+/* --- Task Detail Page --- */
+.task-detail-page {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  max-width: 600px;
+  width: 100%;
+}
+
+.task-detail-page > a {
+  font-size: 0.85rem;
+  color: #777777;
+}
+
+.task-detail-page h2 {
+  font-size: 1.3rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 0.85rem;
+  color: #888888;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.actions {
+  display: flex;
+  gap: 12px;
+  padding-top: 12px;
+  border-top: 1px solid #222222;
+}
+
+.actions button {
+  padding: 8px 20px;
+}
+
+.actions button.danger {
+  border-color: #553333;
+  color: #cc5555;
+}
+
+/* --- Responsive --- */
+@media (max-width: 600px) {
+  #root {
+    padding: 16px 10px;
+  }
+
+  .accounts-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .add-task {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .add-task input,
+  .add-task select {
+    width: 100%;
+    min-width: unset;
+  }
+
+  .add-account-form {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .task-list-page > header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .task-list-page > header button {
+    margin-left: 0;
+  }
+}
