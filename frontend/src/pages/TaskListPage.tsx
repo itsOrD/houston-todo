@@ -1,7 +1,7 @@
 import { useState, useMemo } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../context/useAuth";
-import { useTasks } from "../hooks/useTasks";
+import { useTasks, type Task } from "../hooks/useTasks";
 import { useAccounts } from "../hooks/useAccounts";
 import { pipe, filterByCompleted, sortByPosition, computeStatus } from "../utils/helpers";
 
@@ -24,7 +24,7 @@ export function TaskListPage() {
 
   // Composable filter pipeline — pipe + curried HOF
   const filteredTasks = useMemo(
-    () => pipe(filterByCompleted(filter), sortByPosition)(tasks),
+    () => pipe<Task[]>(filterByCompleted(filter), sortByPosition)(tasks),
     [tasks, filter],
   );
 

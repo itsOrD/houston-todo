@@ -1,13 +1,20 @@
-// Function composition — pipe N functions left-to-right
+// Function composition — pipe N functions left-to-right (HOF bonus)
 export function pipe<T>(...fns: Array<(arg: T) => T>): (arg: T) => T {
   return (arg: T) => fns.reduce((acc, fn) => fn(acc), arg);
 }
 
-// Composable filter — curried HOF returning a filter function
-export const filterByCompleted = (completed: boolean | null) => <T extends { completed: boolean }>(items: T[]) =>
-  completed === null ? items : items.filter(t => t.completed === completed);
+interface TaskLike {
+  completed: boolean;
+  position: number;
+}
 
-export const sortByPosition = <T extends { position: number }>(items: T[]) =>
+// Composable filter — curried HOF returning a filter function
+export const filterByCompleted =
+  <T extends TaskLike>(completed: boolean | null) =>
+  (items: T[]): T[] =>
+    completed === null ? items : items.filter((t) => t.completed === completed);
+
+export const sortByPosition = <T extends TaskLike>(items: T[]): T[] =>
   [...items].sort((a, b) => a.position - b.position);
 
 // Pure function — compute account status from credit percentage

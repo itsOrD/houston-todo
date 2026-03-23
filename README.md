@@ -10,7 +10,7 @@ Manage your AI credit usage across all your accounts — Claude, ChatGPT, Loveab
 docker compose up --build
 ```
 
-Visit **http://localhost:3000** — register an account to start managing your AI credit usage. Plan and prepare tasks for when your credits refresh!
+Visit **http://localhost:4200** — register an account to start managing your AI credit usage. Plan and prepare tasks for when your credits refresh!
 
 To stop: `docker compose down`
 
@@ -45,7 +45,7 @@ The Docker Compose setup is designed to run on any cloud VM. For AWS:
 
 ```
 Internet → EC2 t4g.micro
-              ├── Docker: nginx (frontend) :80
+              ├── Docker: nginx (frontend) :4200 → :80
               ├── Docker: uvicorn (backend) :8000
               └── In-memory store (swap to RDS PostgreSQL for persistence)
 ```

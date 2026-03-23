@@ -2,7 +2,7 @@
 name = "houston-todo-api"
 version = "0.1.0"
 requires-python = ">=3.12"
-dependencies = ["fastapi", "uvicorn[standard]"]
+dependencies = ["fastapi", "uvicorn[standard]", "pydantic[email]"]
 
 [project.optional-dependencies]
 dev = ["pytest", "httpx", "pytest-asyncio"]
