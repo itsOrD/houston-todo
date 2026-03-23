@@ -38,7 +38,7 @@ class TaskCreate(BaseModel):
     account_id: str | None = None
 
 class TaskUpdate(BaseModel):
-    description: str | None = None
+    description: str | None = Field(None, min_length=1, max_length=500)
     completed: bool | None = None
 
 class ReorderRequest(BaseModel):
@@ -54,9 +54,9 @@ class AccountCreate(BaseModel):
 
 
 class AccountUpdate(BaseModel):
-    name: str | None = None
-    credits_used: int | None = None
-    credits_total: int | None = None
+    name: str | None = Field(None, min_length=1, max_length=200)
+    credits_used: int | None = Field(None, ge=0)
+    credits_total: int | None = Field(None, ge=1, le=10000)
     reset_frequency: str | None = None
     reset_time: str | None = None
     timezone: str | None = None
@@ -64,8 +64,10 @@ class AccountUpdate(BaseModel):
 
 ### Authentication dependency ###
 def get_current_user(authorization: str = Header(...)) -> dict:
-    """Extract user from Bearer token"""
-    token = authorization.replace("Bearer ", "")
+    """Extract user from Bearer token."""
+    scheme, _, token = authorization.partition(" ")
+    if scheme.lower() != "bearer" or not token:
+        raise HTTPException(401, "Invalid authorization header")
     user_id = tokens.get(token)
     if not user_id:
         raise HTTPException(401, "Invalid token")
@@ -78,7 +80,7 @@ def get_current_user(authorization: str = Header(...)) -> dict:
 ### API Endpoints ###
 
 #### Authentication Endpoints ####
-@app.post("/api/auth/register")
+@app.post("/api/auth/register", status_code=201)
 def register(body: UserCreate):
     if body.email in users:
         raise HTTPException(400, "Email already registered")
@@ -112,7 +114,9 @@ def get_me(user: dict = Depends(get_current_user)):
 
 @app.post("/api/auth/logout")
 def logout(authorization: str = Header(...)):
-    token = authorization.replace("Bearer ", "")
+    scheme, _, token = authorization.partition(" ")
+    if scheme.lower() != "bearer" or not token:
+        raise HTTPException(401, "Invalid authorization header")
     tokens.pop(token, None)
     return {"message": "Logged out successfully"}
 
@@ -120,8 +124,11 @@ def logout(authorization: str = Header(...)):
 #### Task Endpoints ####
 @app.post("/api/tasks", status_code=201)
 def create_task(body: TaskCreate, user: dict = Depends(get_current_user)):
+    if body.account_id:
+        account = accounts.get(body.account_id)
+        if not account or account["owner"] != user["id"]:
+            raise HTTPException(400, "Invalid account")
     task_id = str(uuid.uuid4())
-    # Position = count of user's existing tasks (append to end)
     user_tasks = [t for t in tasks.values() if t["owner"] == user["id"]]
     tasks[task_id] = {
         "id": task_id,
@@ -143,6 +150,14 @@ def list_tasks(
         user_tasks = [t for t in user_tasks if t["completed"] == completed]
     # Sort by position
     return sorted(user_tasks, key=lambda t: t["position"])
+
+@app.put("/api/tasks/reorder")
+def reorder_tasks(body: ReorderRequest, user: dict = Depends(get_current_user)):
+    for i, task_id in enumerate(body.task_ids):
+        task = tasks.get(task_id)
+        if task and task["owner"] == user["id"]:
+            task["position"] = i
+    return {"message": "Tasks reordered successfully"}
 
 @app.get("/api/tasks/{task_id}")
 def get_task(task_id: str, user: dict = Depends(get_current_user)):
@@ -172,14 +187,6 @@ def delete_task(task_id: str, user: dict = Depends(get_current_user)):
     if not task or task["owner"] != user["id"]:
         raise HTTPException(404, "Task not found")
     del tasks[task_id]
-
-@app.put("/api/tasks/reorder")
-def reorder_tasks(body: ReorderRequest, user: dict = Depends(get_current_user)):
-    for i, task_id in enumerate(body.task_ids):
-        task = tasks.get(task_id)
-        if task and task["owner"] == user["id"]:
-            task["position"] = i
-    return {"message": "Tasks reordered successfully"}
 
 
 # ── Account endpoints ────────────────────────────────────────────

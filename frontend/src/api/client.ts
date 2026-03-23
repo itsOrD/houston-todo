@@ -9,7 +9,7 @@ export class ApiError extends Error {
     }
 }
 
-export function createClient(token: string | string | null) {
+export function createClient(token: string | null) {
     const baseHeaders: Record<string, string> = {
         "Content-Type": "application/json",
     };

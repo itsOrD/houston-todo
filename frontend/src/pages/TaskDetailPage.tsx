@@ -10,6 +10,7 @@ export function TaskDetailPage() {
   const navigate = useNavigate();
   const [task, setTask] = useState<Task | null>(null);
   const [description, setDescription] = useState("");
+  const [error, setError] = useState("");
 
   useEffect(() => {
     if (!token || !id) return;
@@ -29,21 +30,33 @@ export function TaskDetailPage() {
 
   const handleSave = async () => {
     if (!token || !id) return;
-    await createClient(token).put(`/tasks/${id}`, { description });
-    navigate("/");
+    try {
+      await createClient(token).put(`/tasks/${id}`, { description });
+      navigate("/");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to save");
+    }
   };
 
   const handleToggle = async () => {
     if (!token || !id || !task) return;
     const updated = { ...task, completed: !task.completed };
     setTask(updated);
-    await createClient(token).put(`/tasks/${id}`, { completed: updated.completed });
+    try {
+      await createClient(token).put(`/tasks/${id}`, { completed: updated.completed });
+    } catch {
+      setTask(task);
+    }
   };
 
   const handleDelete = async () => {
     if (!token || !id) return;
-    await createClient(token).delete(`/tasks/${id}`);
-    navigate("/");
+    try {
+      await createClient(token).delete(`/tasks/${id}`);
+      navigate("/");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to delete");
+    }
   };
 
   if (!task) return <p>Loading...</p>;
@@ -52,6 +65,7 @@ export function TaskDetailPage() {
     <div className="task-detail-page">
       <Link to="/">← Back to list</Link>
       <h2>Task Detail</h2>
+      {error && <p className="error">{error}</p>}
       <textarea
         value={description}
         onChange={(e) => setDescription(e.target.value)}

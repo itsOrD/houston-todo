@@ -59,10 +59,15 @@ export function useAccounts() {
   const remove = useCallback(
     async (id: string) => {
       if (!token) return;
-      setAccounts((prev) => prev.filter((a) => a.id !== id));
-      await createClient(token).delete(`/accounts/${id}`);
+      const prev = accounts;
+      setAccounts((a) => a.filter((a) => a.id !== id));
+      try {
+        await createClient(token).delete(`/accounts/${id}`);
+      } catch {
+        setAccounts(prev);
+      }
     },
-    [token],
+    [token, accounts],
   );
 
   return { accounts, loading, create, updateCredits, remove };

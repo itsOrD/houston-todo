@@ -63,10 +63,15 @@ export function useTasks() {
   const remove = useCallback(
     async (id: string) => {
       if (!token) return;
-      setTasks((prev) => prev.filter((t) => t.id !== id));
-      await createClient(token).delete(`/tasks/${id}`);
+      const prev = tasks;
+      setTasks((t) => t.filter((t) => t.id !== id));
+      try {
+        await createClient(token).delete(`/tasks/${id}`);
+      } catch {
+        setTasks(prev);
+      }
     },
-    [token],
+    [token, tasks],
   );
 
   return { tasks, loading, create, update, remove };

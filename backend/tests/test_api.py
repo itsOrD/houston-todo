@@ -31,7 +31,7 @@ class TestAuth:
         res = client.post("/api/auth/register", json={
             "name": "A", "email": "a@b.com", "password": "pass1234",
         })
-        assert res.status_code == 200
+        assert res.status_code == 201
         assert "token" in res.json()
 
     def test_login_returns_token(self):
